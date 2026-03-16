@@ -4,32 +4,32 @@
 {% block content %}
 <div class="page-header">
   <div>
-    <p style="font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">
-      <i class="bi bi-calendar3 me-1"></i> {{ today }}
+    <p style="font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">
+      <i class="bi bi-calendar3 me-1"></i>{{ today }} &nbsp;·&nbsp; {{ today_day }}
     </p>
-    <h1 class="page-title">Good work, <span>Athlete</span></h1>
+    <h1 class="page-title">Hey, <span>{{ user.username }}</span></h1>
   </div>
-  <a href="{% url 'session_new' %}" class="btn btn-accent">
-    <i class="bi bi-plus-lg me-1"></i> Log Workout
+  <a href="{% url 'session_new' %}" class="btn-accent d-none d-md-inline-flex">
+    <i class="bi bi-plus-lg"></i> Log Workout
   </a>
 </div>
 
 <div class="page-body">
 
-  <!-- Stats row -->
+  <!-- Stats -->
   <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
       <div class="stat-card">
         <div class="stat-icon"><i class="bi bi-fire"></i></div>
         <div class="stat-number">{{ total_sessions }}</div>
-        <div class="stat-label">Total Sessions</div>
+        <div class="stat-label">Sessions</div>
       </div>
     </div>
     <div class="col-6 col-lg-3">
       <div class="stat-card">
         <div class="stat-icon"><i class="bi bi-lightning-charge"></i></div>
         <div class="stat-number">{{ total_exercises }}</div>
-        <div class="stat-label">Exercises Logged</div>
+        <div class="stat-label">Exercises</div>
       </div>
     </div>
     <div class="col-6 col-lg-3">
@@ -42,8 +42,8 @@
     <div class="col-6 col-lg-3">
       <div class="stat-card">
         <div class="stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
-        <div class="stat-number">{% if muscle_stats %}{{ muscle_stats|length }}{% else %}0{% endif %}</div>
-        <div class="stat-label">Muscle Groups Hit</div>
+        <div class="stat-number">{{ muscle_stats|length }}</div>
+        <div class="stat-label">Muscles Hit</div>
       </div>
     </div>
   </div>
@@ -59,16 +59,15 @@
         <div class="card-body p-3">
           {% if recent_sessions %}
             {% for session in recent_sessions %}
-            {% with date_obj=session.date %}
             <a href="{% url 'session_detail' session.pk %}" class="session-row">
               <div class="session-date-block">
                 <div class="month">{{ session.date|date:"M" }}</div>
                 <div class="day-num">{{ session.date|date:"d" }}</div>
               </div>
-              <div class="flex-grow-1">
-                <div style="font-weight:600;font-size:0.95rem;margin-bottom:4px;">
+              <div class="flex-grow-1" style="min-width:0;">
+                <div style="font-weight:600;font-size:0.92rem;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                   {{ session.day }}
-                  <span style="color:var(--muted);font-weight:400;font-size:0.85rem;margin-left:8px;">
+                  <span style="color:var(--muted);font-weight:400;font-size:0.82rem;margin-left:8px;">
                     {{ session.exercises.count }} exercise{{ session.exercises.count|pluralize }}
                   </span>
                 </div>
@@ -78,56 +77,54 @@
                   {% endfor %}
                 </div>
               </div>
-              <i class="bi bi-chevron-right" style="color:var(--muted);"></i>
+              <i class="bi bi-chevron-right" style="color:var(--muted);flex-shrink:0;"></i>
             </a>
-            {% endwith %}
             {% endfor %}
           {% else %}
             <div class="empty-state">
               <i class="bi bi-journal-x"></i>
-              <p>No sessions yet. <a href="{% url 'session_new' %}" style="color:var(--accent);">Log your first workout!</a></p>
+              <p>No sessions yet.<br>
+                <a href="{% url 'session_new' %}" style="color:var(--accent);">Log your first workout!</a>
+              </p>
             </div>
           {% endif %}
         </div>
       </div>
     </div>
 
-    <!-- Muscle group breakdown -->
+    <!-- Muscle breakdown + CTA -->
     <div class="col-lg-5">
-      <div class="card mb-4">
+      <div class="card mb-3">
         <div class="card-header"><i class="bi bi-body-text me-2"></i>Muscle Focus</div>
         <div class="card-body p-3">
           {% if muscle_stats %}
             {% for muscle, count in muscle_stats %}
             <div class="mb-3">
               <div class="d-flex justify-content-between mb-1">
-                <span style="font-size:0.85rem;font-weight:500;">{{ muscle }}</span>
-                <span style="font-size:0.8rem;color:var(--muted);">{{ count }} session{{ count|pluralize }}</span>
+                <span style="font-size:0.83rem;font-weight:500;">{{ muscle }}</span>
+                <span style="font-size:0.78rem;color:var(--muted);">{{ count }} session{{ count|pluralize }}</span>
               </div>
-              <div style="background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;">
-                {% with pct=count|stringformat:"d" %}
-                <div style="background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;width:{{ count }}0%;max-width:100%;border-radius:4px;transition:width 0.8s ease;"></div>
-                {% endwith %}
+              <div style="background:var(--surface2);border-radius:4px;height:5px;overflow:hidden;">
+                <div style="background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;width:{{ count }}0%;max-width:100%;border-radius:4px;"></div>
               </div>
             </div>
             {% endfor %}
           {% else %}
-            <div class="empty-state" style="padding:30px 0;">
+            <div class="empty-state" style="padding:28px 0;">
               <i class="bi bi-bar-chart"></i>
-              <p style="font-size:0.85rem;">Stats will appear after logging sessions.</p>
+              <p style="font-size:0.82rem;">Stats appear after your first session.</p>
             </div>
           {% endif %}
         </div>
       </div>
 
-      <!-- Quick log card -->
       <div class="card" style="border-color:rgba(255,77,0,0.3);background:rgba(255,77,0,0.04);">
         <div class="card-body p-4 text-center">
-          <i class="bi bi-plus-circle" style="font-size:2rem;color:var(--accent);display:block;margin-bottom:12px;"></i>
+          <i class="bi bi-plus-circle" style="font-size:1.8rem;color:var(--accent);display:block;margin-bottom:10px;"></i>
           <p style="font-weight:600;margin-bottom:4px;">Ready to train?</p>
-          <p style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;">Log today's {{ today_day }} workout and keep your streak alive.</p>
-          <a href="{% url 'session_new' %}" class="btn btn-accent w-100">
-            <i class="bi bi-lightning-charge me-1"></i> Start Session
+          <p style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;">Start a new session for today's {{ today_day }} workout.</p>
+          <a href="{% url 'session_new' %}" class="btn-accent w-100" style="justify-content:center;">
+            <i class="bi bi-lightning-charge"></i> Start Session
           </a>
         </div>
       </div>

@@ -1,28 +1,31 @@
 # 🏋️ IronLog — Gym Progress Tracker
 
-A dark-themed, full-featured gym workout tracker built with Django 4, Bootstrap 5, and SQLite.
+Dark-themed, mobile-first gym tracker built with Django 4, Bootstrap 5, and SQLite.
+Supports multiple users with full authentication.
 
 ## Features
-- Log workout sessions with date, day of week, and target muscle groups
-- Add exercises with smart quick-add suggestions per muscle group
-- Track sets: weight (kg/lbs), reps, and notes — auto-saved inline
-- Dashboard with stats and muscle group breakdown
-- Full workout history grouped by month
+- **Multi-user** — register/login, all data is private per user
+- **Mobile-first** — bottom nav bar, card-based sets on mobile, responsive at every breakpoint
+- **Workout sessions** — date, day of week, target muscle groups, notes
+- **Exercise tracking** — add exercises with smart quick-add per muscle group
+- **Set logging** — weight (kg/lbs), reps, notes — auto-saved on change
+- **Dashboard** — stats and muscle group frequency breakdown
+- **Profile page** — update email, change password
 
 ---
 
-## 🖥️ Run Locally
+## Run Locally
 
 ```bash
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
 ```
-Open: http://127.0.0.1:8000
+Open: **http://127.0.0.1:8000**
 
 ---
 
-## 🚀 Deploy to Railway
+## Deploy to Railway
 
 ### 1. Push to GitHub
 ```bash
@@ -35,20 +38,18 @@ git push -u origin main
 
 ### 2. Create Railway project
 1. Go to https://railway.com → **New Project → Deploy from GitHub repo**
-2. Select your repository — Railway auto-detects Django and builds
+2. Select your repository
 
-### 3. Generate a public URL
+### 3. Generate domain
 Settings → Networking → **Generate Domain**
 
 ### 4. Set environment variables
-In Railway dashboard → your service → **Variables**:
-
 | Key | Value |
 |-----|-------|
-| `SECRET_KEY` | a long random secret string |
+| `SECRET_KEY` | a long random string |
 | `DEBUG` | `False` |
 
-Railway will auto-run migrations and collectstatic on every deploy via `railway.json`.
+Railway auto-runs migrations and starts gunicorn via `railway.json`. ✅
 
 ---
 
@@ -57,15 +58,24 @@ Railway will auto-run migrations and collectstatic on every deploy via `railway.
 gymtracker/
 ├── manage.py
 ├── requirements.txt
-├── railway.json          ← Railway deploy config
+├── railway.json
 ├── .gitignore
-├── gymtracker/           ← Django project config
+├── gymtracker/
 │   ├── settings.py
 │   └── urls.py
-└── tracker/              ← Main app
-    ├── models.py         ← WorkoutSession, Exercise, SetLog
-    ├── views.py          ← Page views + AJAX API
+└── tracker/
+    ├── models.py        — WorkoutSession (user FK), Exercise, SetLog
+    ├── views.py         — Auth views + session CRUD + AJAX API
     ├── urls.py
     ├── migrations/
     └── templates/tracker/
+        ├── base.html              — Sidebar + mobile bottom nav
+        ├── login.html
+        ├── register.html
+        ├── profile.html
+        ├── dashboard.html
+        ├── session_list.html
+        ├── session_detail.html    — Desktop table + mobile cards
+        ├── session_form.html
+        └── session_confirm_delete.html
 ```

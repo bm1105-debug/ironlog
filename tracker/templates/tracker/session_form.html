@@ -4,7 +4,8 @@
 {% block content %}
 <div class="page-header">
   <div>
-    <a href="{% url 'session_list' %}" style="font-size:0.78rem;color:var(--muted);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
+    <a href="{% if session %}{% url 'session_detail' session.pk %}{% else %}{% url 'session_list' %}{% endif %}"
+       style="font-size:0.75rem;color:var(--muted);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
       <i class="bi bi-arrow-left me-1"></i> Back
     </a>
     <h1 class="page-title" style="margin-top:6px;">
@@ -15,29 +16,33 @@
 
 <div class="page-body">
   <div class="row justify-content-center">
-    <div class="col-lg-7">
-      <form method="post">
+    <div class="col-12 col-lg-7">
+      <form method="post" novalidate>
         {% csrf_token %}
-        <div class="card mb-4">
+
+        <div class="card mb-3">
           <div class="card-header"><i class="bi bi-calendar3 me-2"></i>Session Info</div>
           <div class="card-body p-4">
             <div class="row g-3">
-              <div class="col-md-6">
+              <div class="col-6">
                 <label class="form-label">Date</label>
                 <input type="date" name="date" class="form-control"
                        value="{{ session.date|date:'Y-m-d'|default:today }}" required>
               </div>
-              <div class="col-md-6">
-                <label class="form-label">Day of Week</label>
+              <div class="col-6">
+                <label class="form-label">Day</label>
                 <select name="day" class="form-select" required>
                   {% for val, label in days %}
-                  <option value="{{ val }}" {% if session.day == val or today_day == val %}selected{% endif %}>{{ label }}</option>
+                  <option value="{{ val }}"
+                    {% if session.day == val %}selected{% elif not session and today_day == val %}selected{% endif %}>
+                    {{ label }}
+                  </option>
                   {% endfor %}
                 </select>
               </div>
               <div class="col-12">
-                <label class="form-label">Notes (optional)</label>
-                <textarea name="notes" class="form-control" rows="2"
+                <label class="form-label">Notes <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+                <textarea name="notes" class="form-control"
                           placeholder="How did the session feel?">{{ session.notes }}</textarea>
               </div>
             </div>
@@ -55,19 +60,19 @@
               <label for="mg_{{ forloop.counter }}">{{ label }}</label>
               {% endfor %}
             </div>
-            <div class="mt-2" style="font-size:0.78rem;color:var(--muted);">
-              <i class="bi bi-info-circle me-1"></i> Select all that apply
+            <div style="font-size:0.73rem;color:var(--muted);margin-top:10px;">
+              <i class="bi bi-info-circle me-1"></i>Select all that apply
             </div>
           </div>
         </div>
 
         <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-accent flex-grow-1">
-            <i class="bi bi-check-lg me-1"></i>
+          <button type="submit" class="btn-accent flex-grow-1" style="justify-content:center;padding:12px;">
+            <i class="bi bi-check-lg"></i>
             {% if session %}Save Changes{% else %}Create Session{% endif %}
           </button>
           <a href="{% if session %}{% url 'session_detail' session.pk %}{% else %}{% url 'session_list' %}{% endif %}"
-             class="btn btn-ghost">Cancel</a>
+             class="btn-ghost" style="padding:12px 20px;">Cancel</a>
         </div>
       </form>
     </div>
@@ -77,7 +82,6 @@
 
 {% block extra_js %}
 <script>
-  // Auto-set day when date changes
   const dateInput = document.querySelector('input[name="date"]');
   const daySelect = document.querySelector('select[name="day"]');
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];

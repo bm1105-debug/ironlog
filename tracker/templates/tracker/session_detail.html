@@ -3,44 +3,52 @@
 
 {% block content %}
 <div class="page-header">
-  <div>
-    <a href="{% url 'session_list' %}" style="font-size:0.78rem;color:var(--muted);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
-      <i class="bi bi-arrow-left me-1"></i> All Sessions
+  <div style="min-width:0;">
+    <a href="{% url 'session_list' %}"
+       style="font-size:0.73rem;color:var(--muted);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
+      <i class="bi bi-arrow-left me-1"></i> Log
     </a>
-    <h1 class="page-title" style="margin-top:6px;">
-      {{ session.day }} <span>— {{ session.date|date:"d M Y" }}</span>
+    <h1 class="page-title" style="margin-top:5px;font-size:clamp(1.4rem,4vw,2.2rem);">
+      {{ session.day }} <span style="font-size:0.6em;opacity:0.7;">{{ session.date|date:"d M Y" }}</span>
     </h1>
-    <div class="mt-2">
+    <div class="mt-1">
       {% for muscle in session.muscle_groups_list %}
       <span class="muscle-badge">{{ muscle }}</span>
       {% endfor %}
     </div>
   </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'session_edit' session.pk %}" class="btn btn-ghost">
-      <i class="bi bi-pencil me-1"></i> Edit
+  <div class="d-flex gap-2 flex-shrink-0">
+    <a href="{% url 'session_edit' session.pk %}" class="btn-ghost" style="padding:8px 14px;">
+      <i class="bi bi-pencil"></i><span class="d-none d-sm-inline ms-1">Edit</span>
     </a>
-    <a href="{% url 'session_delete' session.pk %}" class="btn btn-ghost" style="color:var(--danger);border-color:var(--danger);">
+    <a href="{% url 'session_delete' session.pk %}" class="btn-ghost"
+       style="padding:8px 12px;color:var(--danger) !important;border-color:var(--danger);">
       <i class="bi bi-trash"></i>
     </a>
   </div>
 </div>
 
 <div class="page-body">
+
   {% if session.notes %}
-  <div class="mb-4" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:14px 18px;">
-    <div style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;"><i class="bi bi-chat-left-text me-1"></i> Notes</div>
-    <div style="font-size:0.9rem;">{{ session.notes }}</div>
+  <div class="mb-4" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:13px 16px;">
+    <div style="font-size:0.67rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">
+      <i class="bi bi-chat-left-text me-1"></i>Notes
+    </div>
+    <div style="font-size:0.88rem;">{{ session.notes }}</div>
   </div>
   {% endif %}
 
   <div class="row g-4">
     <div class="col-lg-8">
-      <!-- Exercises -->
+
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin:0;">
-          <i class="bi bi-lightning-charge me-2" style="color:var(--accent);"></i>Exercises
+        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;margin:0;">
+          <i class="bi bi-lightning-charge me-1" style="color:var(--accent);"></i>Exercises
         </h2>
+        <span id="ex-count-badge" style="font-size:0.75rem;color:var(--muted);">
+          {{ session.exercises.count }} exercise{{ session.exercises.count|pluralize }}
+        </span>
       </div>
 
       <div id="exercises-container">
@@ -48,65 +56,106 @@
         <div class="exercise-card" id="exercise-{{ exercise.pk }}">
           <div class="exercise-header">
             <div class="exercise-name">
-              <span class="set-num me-2">{{ forloop.counter }}</span>{{ exercise.name }}
+              <span class="set-num me-2" style="font-size:0.95rem;">{{ forloop.counter }}</span>
+              {{ exercise.name }}
             </div>
-            <button class="btn btn-ghost btn-sm" onclick="deleteExercise({{ exercise.pk }})" title="Remove exercise">
+            <button class="btn-ghost" style="padding:5px 10px;font-size:0.8rem;"
+                    onclick="deleteExercise({{ exercise.pk }})" title="Remove">
               <i class="bi bi-x-lg"></i>
             </button>
           </div>
-          <div style="padding:0 0 8px;">
-            <table class="set-table">
-              <thead>
-                <tr>
-                  <th style="width:40px;">SET</th>
-                  <th>WEIGHT</th>
-                  <th>REPS</th>
-                  <th>NOTES</th>
-                  <th style="width:40px;"></th>
-                </tr>
-              </thead>
-              <tbody id="sets-{{ exercise.pk }}">
-                {% for set in exercise.sets.all %}
-                <tr id="set-row-{{ set.pk }}">
-                  <td><span class="set-num">{{ set.set_number }}</span></td>
-                  <td>
-                    <div class="d-flex align-items-center gap-1">
-                      <input type="number" class="set-input" step="0.5" min="0"
-                             value="{{ set.weight }}" placeholder="—"
-                             onchange="updateSet({{ set.pk }}, this)"
-                             data-field="weight">
-                      <select class="unit-toggle" onchange="updateSet({{ set.pk }}, this)" data-field="weight_unit">
-                        <option value="kg" {% if set.weight_unit == 'kg' %}selected{% endif %}>kg</option>
-                        <option value="lbs" {% if set.weight_unit == 'lbs' %}selected{% endif %}>lbs</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td>
-                    <input type="number" class="set-input" min="0"
-                           value="{{ set.reps }}" placeholder="—"
-                           onchange="updateSet({{ set.pk }}, this)"
-                           data-field="reps">
-                  </td>
-                  <td>
-                    <input type="text" class="set-input wide" placeholder="Optional note"
-                           value="{{ set.notes }}"
-                           onchange="updateSet({{ set.pk }}, this)"
-                           data-field="notes">
-                  </td>
-                  <td>
-                    <button class="btn btn-ghost btn-sm px-2" onclick="deleteSet({{ set.pk }}, {{ exercise.pk }})" title="Delete set">
-                      <i class="bi bi-trash" style="color:var(--danger);font-size:0.8rem;"></i>
-                    </button>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            <div style="padding:10px 14px;">
-              <button class="btn btn-ghost btn-sm" onclick="addSet({{ exercise.pk }})">
-                <i class="bi bi-plus me-1"></i> Add Set
-              </button>
+
+          <!-- Desktop table -->
+          <table class="set-table">
+            <thead>
+              <tr>
+                <th style="width:38px;">SET</th>
+                <th>WEIGHT</th>
+                <th>REPS</th>
+                <th>NOTES</th>
+                <th style="width:36px;"></th>
+              </tr>
+            </thead>
+            <tbody id="sets-{{ exercise.pk }}">
+              {% for set in exercise.sets.all %}
+              <tr id="set-row-{{ set.pk }}">
+                <td><span class="set-num">{{ set.set_number }}</span></td>
+                <td>
+                  <div class="d-flex align-items-center gap-1">
+                    <input type="number" class="set-input" step="0.5" min="0"
+                           value="{{ set.weight }}" placeholder="—"
+                           onchange="updateSet({{ set.pk }}, this)" data-field="weight">
+                    <select class="unit-select" onchange="updateSet({{ set.pk }}, this)" data-field="weight_unit">
+                      <option value="kg" {% if set.weight_unit == 'kg' %}selected{% endif %}>kg</option>
+                      <option value="lbs" {% if set.weight_unit == 'lbs' %}selected{% endif %}>lbs</option>
+                    </select>
+                  </div>
+                </td>
+                <td>
+                  <input type="number" class="set-input" min="0"
+                         value="{{ set.reps }}" placeholder="—"
+                         onchange="updateSet({{ set.pk }}, this)" data-field="reps">
+                </td>
+                <td>
+                  <input type="text" class="set-input wide" placeholder="Note"
+                         value="{{ set.notes }}"
+                         onchange="updateSet({{ set.pk }}, this)" data-field="notes">
+                </td>
+                <td>
+                  <button class="btn-ghost" style="padding:4px 8px;"
+                          onclick="deleteSet({{ set.pk }})" title="Delete set">
+                    <i class="bi bi-trash" style="color:var(--danger);font-size:0.78rem;"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <!-- Mobile set cards -->
+          <div class="set-cards-mobile" id="set-cards-{{ exercise.pk }}" style="display:none;">
+            {% for set in exercise.sets.all %}
+            <div class="set-card" id="set-card-{{ set.pk }}">
+              <div class="set-card-header">
+                <span class="set-num">Set {{ set.set_number }}</span>
+                <button class="btn-ghost" style="padding:4px 9px;font-size:0.78rem;"
+                        onclick="deleteSet({{ set.pk }})" title="Delete">
+                  <i class="bi bi-trash" style="color:var(--danger);"></i>
+                </button>
+              </div>
+              <div class="set-card-fields">
+                <div class="set-field">
+                  <label>Weight</label>
+                  <input type="number" step="0.5" min="0" value="{{ set.weight }}" placeholder="—"
+                         onchange="updateSet({{ set.pk }}, this)" data-field="weight">
+                </div>
+                <div class="set-field">
+                  <label>Unit</label>
+                  <select onchange="updateSet({{ set.pk }}, this)" data-field="weight_unit">
+                    <option value="kg" {% if set.weight_unit == 'kg' %}selected{% endif %}>kg</option>
+                    <option value="lbs" {% if set.weight_unit == 'lbs' %}selected{% endif %}>lbs</option>
+                  </select>
+                </div>
+                <div class="set-field">
+                  <label>Reps</label>
+                  <input type="number" min="0" value="{{ set.reps }}" placeholder="—"
+                         onchange="updateSet({{ set.pk }}, this)" data-field="reps">
+                </div>
+                <div class="set-field full">
+                  <label>Notes</label>
+                  <input type="text" value="{{ set.notes }}" placeholder="Optional note"
+                         onchange="updateSet({{ set.pk }}, this)" data-field="notes">
+                </div>
+              </div>
             </div>
+            {% endfor %}
+          </div>
+
+          <div style="padding:10px 12px;">
+            <button class="btn-ghost" style="padding:7px 14px;font-size:0.82rem;"
+                    onclick="addSet({{ exercise.pk }})">
+              <i class="bi bi-plus me-1"></i> Add Set
+            </button>
           </div>
         </div>
         {% endfor %}
@@ -120,51 +169,53 @@
       </div>
 
       <!-- Add Exercise -->
-      <div class="card mt-3" style="border-style:dashed;">
+      <div class="card mt-3" style="border-style:dashed;border-color:var(--border);">
         <div class="card-body p-3">
           <div class="d-flex gap-2">
             <input type="text" id="new-exercise-name" class="form-control"
                    placeholder="Exercise name (e.g. Bench Press, Squat…)"
                    onkeydown="if(event.key==='Enter'){addExercise();}">
-            <button class="btn btn-accent" onclick="addExercise()" style="white-space:nowrap;">
-              <i class="bi bi-plus-lg me-1"></i> Add
+            <button class="btn-accent" onclick="addExercise()" style="white-space:nowrap;padding:10px 16px;">
+              <i class="bi bi-plus-lg"></i><span class="d-none d-sm-inline ms-1">Add</span>
             </button>
           </div>
-          <!-- Quick suggestions -->
-          <div class="mt-2" id="suggestions-bar">
-            <span style="font-size:0.72rem;color:var(--muted);margin-right:6px;">Quick add:</span>
+          <div class="mt-2" id="quick-suggestions">
+            <span style="font-size:0.7rem;color:var(--muted);margin-right:4px;">Quick:</span>
             {% for muscle in session.muscle_groups_list %}
               {% if muscle == 'Chest' %}
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Bench Press')">Bench Press</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Incline Press')">Incline Press</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Cable Fly')">Cable Fly</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Dips')">Dips</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Bench Press')">Bench Press</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Incline Press')">Incline Press</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Cable Fly')">Cable Fly</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Dips')">Dips</button>
               {% elif muscle == 'Back' %}
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Deadlift')">Deadlift</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Pull-ups')">Pull-ups</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Barbell Row')">Barbell Row</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Lat Pulldown')">Lat Pulldown</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Deadlift')">Deadlift</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Pull-ups')">Pull-ups</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Barbell Row')">Barbell Row</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Lat Pulldown')">Lat Pulldown</button>
               {% elif muscle == 'Legs' %}
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Squat')">Squat</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Leg Press')">Leg Press</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Romanian Deadlift')">RDL</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Leg Curl')">Leg Curl</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Squat')">Squat</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Leg Press')">Leg Press</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Romanian Deadlift')">RDL</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Leg Curl')">Leg Curl</button>
               {% elif muscle == 'Shoulders' %}
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Overhead Press')">OHP</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Lateral Raise')">Lateral Raise</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Face Pull')">Face Pull</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Overhead Press')">OHP</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Lateral Raise')">Lateral Raise</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Face Pull')">Face Pull</button>
               {% elif muscle == 'Biceps' %}
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Barbell Curl')">Barbell Curl</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Hammer Curl')">Hammer Curl</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Cable Curl')">Cable Curl</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Barbell Curl')">Barbell Curl</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Hammer Curl')">Hammer Curl</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Cable Curl')">Cable Curl</button>
               {% elif muscle == 'Triceps' %}
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Skull Crushers')">Skull Crushers</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Tricep Pushdown')">Pushdown</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Overhead Extension')">OHE</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Skull Crushers')">Skull Crushers</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Tricep Pushdown')">Pushdown</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Overhead Extension')">OHE</button>
               {% elif muscle == 'Core / Abs' %}
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Plank')">Plank</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Cable Crunch')">Cable Crunch</button>
-                <button class="btn btn-ghost btn-sm py-0 px-2 me-1 mb-1" onclick="quickAdd('Leg Raise')">Leg Raise</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Plank')">Plank</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Cable Crunch')">Cable Crunch</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Leg Raise')">Leg Raise</button>
+              {% elif muscle == 'Glutes' %}
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Hip Thrust')">Hip Thrust</button>
+                <button class="btn-ghost" style="padding:3px 10px;font-size:0.74rem;margin:2px;" onclick="quickAdd('Bulgarian Split Squat')">Split Squat</button>
               {% endif %}
             {% endfor %}
           </div>
@@ -172,39 +223,26 @@
       </div>
     </div>
 
-    <!-- Session summary sidebar -->
-    <div class="col-lg-4">
+    <!-- Summary sidebar (desktop) -->
+    <div class="col-lg-4 d-none d-lg-block">
       <div class="card" style="position:sticky;top:20px;">
         <div class="card-header"><i class="bi bi-bar-chart me-2"></i>Session Summary</div>
-        <div class="card-body p-4" id="summary-panel">
+        <div class="card-body p-4">
           <div class="mb-3">
             <div class="stat-label">Total Exercises</div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:800;" id="summary-exercises">
-              {{ session.exercises.count }}
-            </div>
+            <div class="stat-number" id="summary-exercises">{{ session.exercises.count }}</div>
           </div>
           <div class="mb-3">
             <div class="stat-label">Total Sets</div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:800;" id="summary-sets">
-              {% with total_sets=0 %}
-              {% for ex in session.exercises.all %}
-              {% endfor %}
-              {{ session.exercises.all|length }}
-              {% endwith %}
-              <span id="summary-sets-count">
-                {% with ns=0 %}{% for ex in session.exercises.all %}{% for s in ex.sets.all %}{% endfor %}{% endfor %}
-                —
-                {% endwith %}
-              </span>
-            </div>
+            <div class="stat-number" id="summary-sets">—</div>
           </div>
-          <hr style="border-color:var(--border);">
+          <hr style="border-color:var(--border);margin:16px 0;">
           <div class="stat-label mb-2">Muscles Targeted</div>
           {% for muscle in session.muscle_groups_list %}
           <span class="muscle-badge d-inline-block mb-1">{{ muscle }}</span>
           {% endfor %}
-          <hr style="border-color:var(--border);">
-          <a href="{% url 'session_list' %}" class="btn btn-ghost w-100">
+          <hr style="border-color:var(--border);margin:16px 0;">
+          <a href="{% url 'session_list' %}" class="btn-ghost w-100" style="justify-content:center;">
             <i class="bi bi-arrow-left me-1"></i> Back to Log
           </a>
         </div>
@@ -218,25 +256,39 @@
 <script>
 const SESSION_ID = {{ session.pk }};
 const CSRF = '{{ csrf_token }}';
-
-function getCsrf() { return CSRF; }
+const IS_MOBILE = () => window.innerWidth < 768;
 
 function showToast(msg, type='success') {
-  const colors = {success:'var(--success)', error:'var(--danger)', info:'var(--accent)'};
+  const colors = { success:'var(--success)', error:'var(--danger)', info:'var(--accent)' };
   const el = document.createElement('div');
-  el.className = 'position-fixed top-0 end-0 p-3';
-  el.style.zIndex = '9999';
-  el.innerHTML = `<div style="background:${colors[type]||colors.info};color:#fff;padding:12px 20px;border-radius:8px;font-size:0.9rem;box-shadow:0 4px 20px rgba(0,0,0,0.4);">${msg}</div>`;
+  el.style.cssText = `position:fixed;bottom:${IS_MOBILE()?'calc(var(--bottomnav-h) + 12px)':'20px'};right:16px;z-index:9999;
+    background:${colors[type]||colors.info};color:#fff;padding:11px 18px;border-radius:8px;
+    font-size:0.88rem;box-shadow:0 4px 20px rgba(0,0,0,0.4);max-width:280px;
+    animation:fadeIn 0.2s ease;`;
+  el.textContent = msg;
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), 3000);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity 0.4s'; setTimeout(()=>el.remove(),400); }, 2800);
 }
 
 function refreshSummary() {
   const cards = document.querySelectorAll('.exercise-card');
   let totalSets = 0;
-  cards.forEach(c => { totalSets += c.querySelectorAll('tbody tr').length; });
-  document.getElementById('summary-exercises').textContent = cards.length;
-  document.getElementById('summary-sets-count').textContent = totalSets + ' sets';
+  cards.forEach(c => {
+    totalSets += c.querySelectorAll('[id^="set-row-"]').length
+               + c.querySelectorAll('[id^="set-card-"]').length / 1;
+    // count unique set IDs
+  });
+  // Count from table rows (desktop) — they're always in DOM
+  totalSets = 0;
+  document.querySelectorAll('[id^="set-row-"]').length && (totalSets = document.querySelectorAll('[id^="set-row-"]').length);
+  if (totalSets === 0) totalSets = document.querySelectorAll('[id^="set-card-"]').length;
+
+  const exCount = cards.length;
+  document.getElementById('summary-exercises').textContent = exCount;
+  document.getElementById('summary-sets').textContent = totalSets || '0';
+
+  const badge = document.getElementById('ex-count-badge');
+  if (badge) badge.textContent = `${exCount} exercise${exCount===1?'':'s'}`;
 }
 
 async function addExercise() {
@@ -245,13 +297,14 @@ async function addExercise() {
   if (!name) { input.focus(); return; }
   const res = await fetch(`/api/sessions/${SESSION_ID}/exercises/`, {
     method: 'POST',
-    headers: {'Content-Type':'application/json','X-CSRFToken': getCsrf()},
-    body: JSON.stringify({name})
+    headers: { 'Content-Type':'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ name })
   });
   if (res.ok) {
     const data = await res.json();
     input.value = '';
     appendExerciseCard(data);
+    document.getElementById('empty-exercises')?.remove();
     showToast(`"${data.name}" added`);
     refreshSummary();
   }
@@ -263,47 +316,42 @@ function quickAdd(name) {
 }
 
 function appendExerciseCard(ex) {
-  document.getElementById('empty-exercises')?.remove();
   const container = document.getElementById('exercises-container');
   const count = container.querySelectorAll('.exercise-card').length + 1;
-  const html = `
-  <div class="exercise-card" id="exercise-${ex.id}">
+  const div = document.createElement('div');
+  div.className = 'exercise-card';
+  div.id = `exercise-${ex.id}`;
+  div.innerHTML = `
     <div class="exercise-header">
       <div class="exercise-name">
-        <span class="set-num me-2">${count}</span>${ex.name}
+        <span class="set-num me-2" style="font-size:0.95rem;">${count}</span>${ex.name}
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="deleteExercise(${ex.id})" title="Remove exercise">
+      <button class="btn-ghost" style="padding:5px 10px;font-size:0.8rem;"
+              onclick="deleteExercise(${ex.id})" title="Remove">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
-    <div style="padding:0 0 8px;">
-      <table class="set-table">
-        <thead>
-          <tr>
-            <th style="width:40px;">SET</th>
-            <th>WEIGHT</th>
-            <th>REPS</th>
-            <th>NOTES</th>
-            <th style="width:40px;"></th>
-          </tr>
-        </thead>
-        <tbody id="sets-${ex.id}"></tbody>
-      </table>
-      <div style="padding:10px 14px;">
-        <button class="btn btn-ghost btn-sm" onclick="addSet(${ex.id})">
-          <i class="bi bi-plus me-1"></i> Add Set
-        </button>
-      </div>
-    </div>
-  </div>`;
-  container.insertAdjacentHTML('beforeend', html);
+    <table class="set-table">
+      <thead>
+        <tr>
+          <th style="width:38px;">SET</th><th>WEIGHT</th><th>REPS</th><th>NOTES</th><th style="width:36px;"></th>
+        </tr>
+      </thead>
+      <tbody id="sets-${ex.id}"></tbody>
+    </table>
+    <div class="set-cards-mobile" id="set-cards-${ex.id}" style="display:${IS_MOBILE()?'block':'none'}"></div>
+    <div style="padding:10px 12px;">
+      <button class="btn-ghost" style="padding:7px 14px;font-size:0.82rem;" onclick="addSet(${ex.id})">
+        <i class="bi bi-plus me-1"></i> Add Set
+      </button>
+    </div>`;
+  container.appendChild(div);
 }
 
 async function deleteExercise(id) {
   if (!confirm('Remove this exercise and all its sets?')) return;
   const res = await fetch(`/api/exercises/${id}/delete/`, {
-    method: 'DELETE',
-    headers: {'X-CSRFToken': getCsrf()}
+    method: 'DELETE', headers: { 'X-CSRFToken': CSRF }
   });
   if (res.ok) {
     document.getElementById(`exercise-${id}`)?.remove();
@@ -315,80 +363,133 @@ async function deleteExercise(id) {
 async function addSet(exerciseId) {
   const res = await fetch(`/api/exercises/${exerciseId}/sets/`, {
     method: 'POST',
-    headers: {'Content-Type':'application/json','X-CSRFToken': getCsrf()},
-    body: JSON.stringify({weight:'', reps:'', weight_unit:'kg', notes:''})
+    headers: { 'Content-Type':'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ weight:'', reps:'', weight_unit:'kg', notes:'' })
   });
   if (res.ok) {
     const s = await res.json();
+    // Desktop
     const tbody = document.getElementById(`sets-${exerciseId}`);
-    tbody.insertAdjacentHTML('beforeend', buildSetRow(s));
+    if (tbody) {
+      const tr = document.createElement('tr');
+      tr.id = `set-row-${s.id}`;
+      tr.innerHTML = buildSetRow(s);
+      tbody.appendChild(tr);
+    }
+    // Mobile
+    const mobileContainer = document.getElementById(`set-cards-${exerciseId}`);
+    if (mobileContainer) {
+      const div = document.createElement('div');
+      div.innerHTML = buildSetCard(s);
+      mobileContainer.appendChild(div.firstElementChild);
+    }
     refreshSummary();
+    showToast(`Set ${s.set_number} added`, 'info');
   }
 }
 
 function buildSetRow(s) {
   return `
-  <tr id="set-row-${s.id}">
     <td><span class="set-num">${s.set_number}</span></td>
     <td>
       <div class="d-flex align-items-center gap-1">
-        <input type="number" class="set-input" step="0.5" min="0"
-               value="${s.weight}" placeholder="—"
-               onchange="updateSet(${s.id}, this)" data-field="weight">
-        <select class="unit-toggle" onchange="updateSet(${s.id}, this)" data-field="weight_unit">
-          <option value="kg" ${s.weight_unit==='kg'?'selected':''}>kg</option>
-          <option value="lbs" ${s.weight_unit==='lbs'?'selected':''}>lbs</option>
+        <input type="number" class="set-input" step="0.5" min="0" value="${s.weight}" placeholder="—"
+               onchange="updateSet(${s.id},this)" data-field="weight">
+        <select class="unit-select" onchange="updateSet(${s.id},this)" data-field="weight_unit">
+          <option value="kg">kg</option><option value="lbs">lbs</option>
         </select>
       </div>
     </td>
-    <td>
-      <input type="number" class="set-input" min="0"
-             value="${s.reps}" placeholder="—"
-             onchange="updateSet(${s.id}, this)" data-field="reps">
-    </td>
-    <td>
-      <input type="text" class="set-input wide" placeholder="Optional note"
-             value="${s.notes}"
-             onchange="updateSet(${s.id}, this)" data-field="notes">
-    </td>
-    <td>
-      <button class="btn btn-ghost btn-sm px-2" onclick="deleteSet(${s.id})" title="Delete set">
-        <i class="bi bi-trash" style="color:var(--danger);font-size:0.8rem;"></i>
-      </button>
-    </td>
-  </tr>`;
+    <td><input type="number" class="set-input" min="0" value="${s.reps}" placeholder="—"
+               onchange="updateSet(${s.id},this)" data-field="reps"></td>
+    <td><input type="text" class="set-input wide" placeholder="Note" value="${s.notes}"
+               onchange="updateSet(${s.id},this)" data-field="notes"></td>
+    <td><button class="btn-ghost" style="padding:4px 8px;" onclick="deleteSet(${s.id})" title="Delete">
+      <i class="bi bi-trash" style="color:var(--danger);font-size:0.78rem;"></i></button></td>`;
 }
 
+function buildSetCard(s) {
+  return `
+  <div class="set-card" id="set-card-${s.id}">
+    <div class="set-card-header">
+      <span class="set-num">Set ${s.set_number}</span>
+      <button class="btn-ghost" style="padding:4px 9px;font-size:0.78rem;" onclick="deleteSet(${s.id})">
+        <i class="bi bi-trash" style="color:var(--danger);"></i>
+      </button>
+    </div>
+    <div class="set-card-fields">
+      <div class="set-field"><label>Weight</label>
+        <input type="number" step="0.5" min="0" value="${s.weight}" placeholder="—"
+               onchange="updateSet(${s.id},this)" data-field="weight"></div>
+      <div class="set-field"><label>Unit</label>
+        <select onchange="updateSet(${s.id},this)" data-field="weight_unit">
+          <option value="kg">kg</option><option value="lbs">lbs</option>
+        </select></div>
+      <div class="set-field"><label>Reps</label>
+        <input type="number" min="0" value="${s.reps}" placeholder="—"
+               onchange="updateSet(${s.id},this)" data-field="reps"></div>
+      <div class="set-field full"><label>Notes</label>
+        <input type="text" value="${s.notes}" placeholder="Optional note"
+               onchange="updateSet(${s.id},this)" data-field="notes"></div>
+    </div>
+  </div>`;
+}
+
+function getSetData(setId) {
+  // Try desktop row first, then mobile card
+  let container = document.getElementById(`set-row-${setId}`) || document.getElementById(`set-card-${setId}`);
+  if (!container) return {};
+  return {
+    weight: container.querySelector('[data-field="weight"]')?.value || '',
+    weight_unit: container.querySelector('[data-field="weight_unit"]')?.value || 'kg',
+    reps: container.querySelector('[data-field="reps"]')?.value || '',
+    notes: container.querySelector('[data-field="notes"]')?.value || '',
+  };
+}
+
+let saveTimers = {};
 async function updateSet(setId, inputEl) {
-  const row = document.getElementById(`set-row-${setId}`);
-  const weight = row.querySelector('[data-field="weight"]')?.value || '';
-  const weight_unit = row.querySelector('[data-field="weight_unit"]')?.value || 'kg';
-  const reps = row.querySelector('[data-field="reps"]')?.value || '';
-  const notes = row.querySelector('[data-field="notes"]')?.value || '';
-  const res = await fetch(`/api/sets/${setId}/update/`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json','X-CSRFToken': getCsrf()},
-    body: JSON.stringify({weight, weight_unit, reps, notes})
-  });
-  if (res.ok) {
-    inputEl.style.borderColor = 'var(--success)';
-    setTimeout(() => { inputEl.style.borderColor = ''; }, 1200);
-  }
+  clearTimeout(saveTimers[setId]);
+  saveTimers[setId] = setTimeout(async () => {
+    const data = getSetData(setId);
+    const res = await fetch(`/api/sets/${setId}/update/`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      inputEl.style.borderColor = 'var(--success)';
+      setTimeout(() => { inputEl.style.borderColor = ''; }, 1000);
+    }
+  }, 600);
 }
 
 async function deleteSet(setId) {
   const res = await fetch(`/api/sets/${setId}/delete/`, {
-    method: 'DELETE',
-    headers: {'X-CSRFToken': getCsrf()}
+    method: 'DELETE', headers: { 'X-CSRFToken': CSRF }
   });
   if (res.ok) {
     document.getElementById(`set-row-${setId}`)?.remove();
+    document.getElementById(`set-card-${setId}`)?.remove();
     showToast('Set removed');
     refreshSummary();
   }
 }
 
-// Init summary
+// Init
 refreshSummary();
+
+// Show/hide mobile cards vs table on resize
+function applyLayout() {
+  const mobile = IS_MOBILE();
+  document.querySelectorAll('.set-cards-mobile').forEach(el => el.style.display = mobile ? 'block' : 'none');
+  document.querySelectorAll('.set-table').forEach(el => el.style.display = mobile ? 'none' : 'table');
+}
+
+window.addEventListener('resize', applyLayout);
+applyLayout();
 </script>
+<style>
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+</style>
 {% endblock %}

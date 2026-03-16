@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0d0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>{% block title %}IronLog{% endblock %}</title>
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg:        #0d0d0f;
@@ -21,150 +21,244 @@
       --text:      #e8e8ee;
       --muted:     #7a7a8c;
       --success:   #00c97a;
-      --warning:   #ffd166;
       --danger:    #ff3860;
+      --sidebar-w: 240px;
+      --bottomnav-h: 64px;
     }
 
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
 
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'Barlow', sans-serif;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    /* Noise texture overlay */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Sidebar */
+    /* ── Sidebar (desktop) ── */
     .sidebar {
       position: fixed;
       top: 0; left: 0;
-      width: 240px;
+      width: var(--sidebar-w);
       height: 100vh;
       background: var(--surface);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      z-index: 100;
-      padding: 0;
+      z-index: 300;
+      transition: transform 0.28s cubic-bezier(.4,0,.2,1);
     }
 
     .sidebar-logo {
-      padding: 28px 24px 20px;
+      padding: 24px 22px 18px;
       border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
     .sidebar-logo .brand {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: 0.05em;
+      font-size: 1.9rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
       color: var(--text);
       line-height: 1;
     }
 
-    .sidebar-logo .brand span {
-      color: var(--accent);
-    }
+    .sidebar-logo .brand span { color: var(--accent); }
 
     .sidebar-logo .tagline {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       color: var(--muted);
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
     .sidebar-nav {
-      padding: 16px 12px;
+      padding: 14px 10px;
       flex: 1;
+      overflow-y: auto;
     }
 
     .nav-label {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--muted);
-      padding: 8px 12px 4px;
-      margin-top: 8px;
+      padding: 10px 12px 4px;
     }
 
     .sidebar-nav .nav-link {
       color: var(--muted);
       font-weight: 500;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       padding: 10px 14px;
       border-radius: 8px;
-      transition: all 0.18s;
+      transition: all 0.16s;
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 2px;
+      border-left: 3px solid transparent;
     }
 
-    .sidebar-nav .nav-link:hover {
-      color: var(--text);
-      background: var(--surface2);
-    }
+    .sidebar-nav .nav-link:hover { color: var(--text); background: var(--surface2); }
+    .sidebar-nav .nav-link.active { color: var(--text); background: rgba(255,77,0,0.1); border-left-color: var(--accent); }
+    .sidebar-nav .nav-link i { font-size: 1.05rem; width: 20px; text-align: center; }
 
-    .sidebar-nav .nav-link.active {
-      color: var(--text);
-      background: rgba(255, 77, 0, 0.12);
-      border-left: 3px solid var(--accent);
-    }
-
-    .sidebar-nav .nav-link i { font-size: 1.1rem; width: 20px; }
-
-    .sidebar-footer {
-      padding: 16px 24px;
+    .sidebar-user {
+      padding: 14px 18px;
       border-top: 1px solid var(--border);
-      font-size: 0.75rem;
-      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
-    /* Main content */
+    .user-avatar {
+      width: 34px; height: 34px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em; }
+
+    /* ── Sidebar overlay (mobile) ── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 299;
+      backdrop-filter: blur(2px);
+    }
+
+    .sidebar-overlay.show { display: block; }
+
+    /* ── Main content ── */
     .main-content {
-      margin-left: 240px;
+      margin-left: var(--sidebar-w);
       min-height: 100vh;
-      position: relative;
-      z-index: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     .page-header {
-      padding: 40px 40px 24px;
+      padding: 36px 36px 20px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
-      gap: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     .page-title {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 2.4rem;
-      font-weight: 800;
+      font-size: 2.2rem;
+      font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       line-height: 1;
       color: var(--text);
-      margin: 0;
     }
 
     .page-title span { color: var(--accent); }
+    .page-body { padding: 28px 36px; flex: 1; }
 
-    .page-body { padding: 32px 40px; }
+    /* ── Bottom nav (mobile only) ── */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--bottomnav-h);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
 
-    /* Cards */
+    .bottom-nav-inner {
+      display: flex;
+      height: 100%;
+    }
+
+    .bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+      padding: 8px 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+
+    .bottom-nav-item i { font-size: 1.3rem; }
+    .bottom-nav-item.active { color: var(--accent); }
+    .bottom-nav-item:hover { color: var(--text); }
+
+    .bottom-nav-item.fab {
+      position: relative;
+    }
+
+    .bottom-nav-item.fab .fab-circle {
+      width: 44px; height: 44px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: -2px;
+      box-shadow: 0 4px 16px rgba(255,77,0,0.4);
+    }
+
+    .bottom-nav-item.fab i { font-size: 1.3rem; color: #fff; }
+
+    /* ── Mobile header bar ── */
+    .mobile-topbar {
+      display: none;
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 18px;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .mobile-topbar .brand {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .mobile-topbar .brand span { color: var(--accent); }
+
+    /* ── Cards ── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -176,21 +270,21 @@
       background: var(--surface2);
       border-bottom: 1px solid var(--border);
       border-radius: 12px 12px 0 0 !important;
-      padding: 14px 20px;
+      padding: 12px 18px;
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
     }
 
-    /* Stat cards */
+    /* ── Stat cards ── */
     .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 24px;
+      padding: 20px;
       position: relative;
       overflow: hidden;
       transition: transform 0.2s, border-color 0.2s;
@@ -208,180 +302,165 @@
 
     .stat-number {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 3rem;
-      font-weight: 800;
+      font-size: 2.6rem;
+      font-weight: 900;
       line-height: 1;
       color: var(--text);
     }
 
     .stat-label {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--muted);
       margin-top: 4px;
     }
 
-    .stat-icon {
-      font-size: 1.6rem;
-      color: var(--accent);
-      margin-bottom: 12px;
-    }
+    .stat-icon { font-size: 1.4rem; color: var(--accent); margin-bottom: 10px; }
 
-    /* Muscle badge */
+    /* ── Muscle badges ── */
     .muscle-badge {
       display: inline-block;
-      background: rgba(255,77,0,0.12);
-      border: 1px solid rgba(255,77,0,0.3);
+      background: rgba(255,77,0,0.1);
+      border: 1px solid rgba(255,77,0,0.25);
       color: var(--accent2);
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 3px 10px;
+      padding: 3px 9px;
       border-radius: 20px;
     }
 
-    /* Session row */
+    /* ── Session rows ── */
     .session-row {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 18px 22px;
-      margin-bottom: 10px;
+      padding: 15px 18px;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       transition: border-color 0.18s, transform 0.18s;
       text-decoration: none;
       color: inherit;
     }
 
-    .session-row:hover {
-      border-color: var(--accent);
-      transform: translateX(4px);
-      color: inherit;
-    }
+    .session-row:hover { border-color: var(--accent); transform: translateX(3px); color: inherit; }
 
     .session-date-block {
       background: var(--surface2);
       border-radius: 8px;
-      padding: 8px 12px;
+      padding: 7px 10px;
       text-align: center;
-      min-width: 56px;
+      min-width: 50px;
       border: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
-    .session-date-block .month {
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--accent);
-      font-weight: 700;
-    }
+    .session-date-block .month { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+    .session-date-block .day-num { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 900; line-height: 1; color: var(--text); }
 
-    .session-date-block .day-num {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.6rem;
-      font-weight: 800;
-      line-height: 1;
-      color: var(--text);
-    }
-
-    /* Buttons */
+    /* ── Buttons ── */
     .btn-accent {
       background: var(--accent);
-      color: #fff;
+      color: #fff !important;
       border: none;
       font-weight: 600;
+      font-size: 0.88rem;
       letter-spacing: 0.04em;
       padding: 10px 22px;
       border-radius: 8px;
       transition: background 0.18s, transform 0.15s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .btn-accent:hover {
-      background: var(--accent2);
-      color: #fff;
-      transform: translateY(-1px);
-    }
+    .btn-accent:hover { background: var(--accent2); transform: translateY(-1px); }
 
     .btn-ghost {
       background: transparent;
       border: 1px solid var(--border);
-      color: var(--muted);
+      color: var(--muted) !important;
       font-weight: 500;
-      padding: 8px 18px;
+      font-size: 0.85rem;
+      padding: 9px 18px;
       border-radius: 8px;
       transition: all 0.18s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .btn-ghost:hover {
-      border-color: var(--text);
-      color: var(--text);
-      background: var(--surface2);
-    }
+    .btn-ghost:hover { border-color: var(--text); color: var(--text) !important; background: var(--surface2); }
 
-    /* Form controls */
+    /* ── Forms ── */
     .form-control, .form-select {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
+      background: var(--surface2) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
       border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
 
     .form-control:focus, .form-select:focus {
-      background: var(--surface2);
-      border-color: var(--accent);
-      color: var(--text);
-      box-shadow: 0 0 0 3px rgba(255,77,0,0.15);
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(255,77,0,0.15) !important;
+      outline: none;
     }
 
-    .form-control::placeholder { color: var(--muted); }
+    .form-control::placeholder { color: var(--muted) !important; }
+
     .form-label {
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--muted);
       margin-bottom: 6px;
+      display: block;
     }
 
-    /* Checkbox muscle group */
-    .muscle-check {
-      display: none;
-    }
+    textarea.form-control { resize: vertical; min-height: 80px; }
 
+    /* ── Muscle group checkbox pills ── */
+    .muscle-check { display: none; }
     .muscle-check + label {
       display: inline-block;
-      padding: 7px 16px;
+      padding: 6px 14px;
       border: 1px solid var(--border);
       border-radius: 20px;
       cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 500;
       color: var(--muted);
-      transition: all 0.18s;
+      transition: all 0.15s;
       margin: 3px;
+      user-select: none;
     }
-
     .muscle-check:checked + label {
-      background: rgba(255,77,0,0.15);
+      background: rgba(255,77,0,0.14);
       border-color: var(--accent);
       color: var(--accent2);
     }
 
-    /* Workout exercise card */
+    /* ── Exercise cards ── */
     .exercise-card {
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       overflow: hidden;
     }
 
     .exercise-header {
-      padding: 14px 18px;
+      padding: 13px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -391,193 +470,332 @@
 
     .exercise-name {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
 
-    /* Set table */
-    .set-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
+    /* ── Set table (desktop) ── */
+    .set-table { width: 100%; border-collapse: collapse; }
     .set-table th {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
-      padding: 8px 14px;
+      padding: 8px 12px;
       text-align: left;
       border-bottom: 1px solid var(--border);
     }
-
-    .set-table td {
-      padding: 10px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      vertical-align: middle;
-    }
-
+    .set-table td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
     .set-table tr:last-child td { border-bottom: none; }
 
-    .set-num {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--accent);
-      width: 36px;
-    }
+    .set-num { font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem; font-weight: 800; color: var(--accent); }
 
     .set-input {
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 0.9rem;
-      width: 80px;
+      padding: 6px 9px;
+      font-size: 0.88rem;
+      width: 76px;
       transition: border-color 0.15s;
     }
 
-    .set-input:focus {
+    .set-input.wide { width: 110px; }
+    .set-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(255,77,0,0.15); }
+
+    .unit-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 6px 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    /* ── Set cards (mobile) ── */
+    .set-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 8px 12px;
+    }
+
+    .set-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .set-card-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .set-field label {
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .set-field input, .set-field select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+    }
+
+    .set-field input:focus, .set-field select:focus {
       outline: none;
       border-color: var(--accent);
       box-shadow: 0 0 0 2px rgba(255,77,0,0.15);
     }
 
-    .set-input.wide { width: 120px; }
+    .set-field.full { grid-column: 1 / -1; }
 
-    .unit-toggle {
+    /* ── Auth pages ── */
+    .auth-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background: var(--bg);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
       background: var(--surface);
       border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+    }
+
+    .auth-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .auth-logo span { color: var(--accent); }
+
+    .auth-subtitle {
+      text-align: center;
+      font-size: 0.8rem;
       color: var(--muted);
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      transition: all 0.15s;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 32px;
     }
 
-    .unit-toggle:hover, .unit-toggle.active {
-      border-color: var(--accent);
-      color: var(--accent2);
-    }
-
-    /* Alert / messages */
-    .alert { border-radius: 8px; border: none; font-size: 0.9rem; }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .sidebar { transform: translateX(-100%); width: 220px; }
-      .sidebar.open { transform: translateX(0); }
-      .main-content { margin-left: 0; }
-      .page-header { padding: 24px 20px 16px; flex-direction: column; align-items: flex-start; }
-      .page-body { padding: 20px; }
-    }
+    /* ── Misc ── */
+    .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+    .empty-state i { font-size: 2.8rem; display: block; margin-bottom: 14px; opacity: 0.35; }
 
     .divider-label {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--muted);
       text-align: center;
       position: relative;
-      margin: 20px 0;
+      margin: 18px 0;
     }
-
     .divider-label::before, .divider-label::after {
       content: '';
       position: absolute;
       top: 50%;
-      width: 40%;
+      width: 42%;
       height: 1px;
       background: var(--border);
     }
-
     .divider-label::before { left: 0; }
     .divider-label::after { right: 0; }
 
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--muted);
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .alert { border-radius: 8px; border: none; font-size: 0.88rem; }
+    .alert-danger { background: rgba(255,56,96,0.15); color: #ff6b84; }
+    .alert-success { background: rgba(0,201,122,0.12); color: #00c97a; }
+    .alert-info { background: rgba(255,77,0,0.1); color: var(--accent2); }
+
+    /* ── Responsive breakpoints ── */
+    @media (max-width: 767px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,0.5); }
+      .main-content { margin-left: 0; padding-bottom: var(--bottomnav-h); }
+      .bottom-nav { display: flex; flex-direction: column; }
+      .mobile-topbar { display: flex; }
+      .page-header { padding: 20px 18px 16px; }
+      .page-body { padding: 16px 18px; }
+      .set-table { display: none; }
+      .set-cards-mobile { display: block !important; }
     }
 
-    .empty-state i {
-      font-size: 3rem;
-      display: block;
-      margin-bottom: 16px;
-      opacity: 0.4;
+    @media (min-width: 768px) {
+      .set-cards-mobile { display: none; }
+      .mobile-topbar { display: none; }
     }
 
-    .toast-container { z-index: 9999; }
+    /* pull to safe area */
+    @supports (padding: max(0px)) {
+      .main-content { padding-bottom: max(var(--bottomnav-h), env(safe-area-inset-bottom)); }
+    }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
 <body>
-  <!-- Sidebar -->
-  <nav class="sidebar">
-    <div class="sidebar-logo">
-      <div class="brand"><span>Iron</span>Log</div>
-      <div class="tagline">Gym Progress Tracker</div>
+
+{% if user.is_authenticated %}
+<!-- Sidebar overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand"><span>Iron</span>Log</div>
+    <div class="tagline">Gym Progress Tracker</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <i class="bi bi-grid-1x2"></i> Dashboard
+    </a>
+    <a href="{% url 'session_list' %}" class="nav-link {% if 'session' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-journal-text"></i> Workout Log
+    </a>
+    <div class="nav-label" style="margin-top:10px;">Quick</div>
+    <a href="{% url 'session_new' %}" class="nav-link">
+      <i class="bi bi-plus-circle"></i> New Session
+    </a>
+    <div class="nav-label" style="margin-top:10px;">Account</div>
+    <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+      <i class="bi bi-person"></i> Profile
+    </a>
+    <a href="{% url 'logout' %}" class="nav-link">
+      <i class="bi bi-box-arrow-right"></i> Log Out
+    </a>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar">{{ user.username|slice:":1"|upper }}</div>
+    <div class="user-info">
+      <div class="user-name">{{ user.username }}</div>
+      <div class="user-role">Athlete</div>
     </div>
-    <div class="sidebar-nav">
-      <div class="nav-label">Menu</div>
-      <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-        <i class="bi bi-grid-1x2"></i> Dashboard
+  </div>
+</nav>
+
+<!-- Main -->
+<main class="main-content">
+  <!-- Mobile top bar -->
+  <div class="mobile-topbar">
+    <div class="brand"><span>Iron</span>Log</div>
+    <div class="d-flex align-items-center gap-2">
+      <a href="{% url 'session_new' %}" class="btn-accent" style="padding:8px 14px;font-size:0.8rem;">
+        <i class="bi bi-plus-lg"></i>
       </a>
-      <a href="{% url 'session_list' %}" class="nav-link {% if 'session' in request.resolver_match.url_name %}active{% endif %}">
-        <i class="bi bi-journal-text"></i> Workout Log
-      </a>
-      <div class="nav-label" style="margin-top:16px;">Quick Add</div>
-      <a href="{% url 'session_new' %}" class="nav-link">
-        <i class="bi bi-plus-circle"></i> New Session
-      </a>
+      <button class="btn-ghost" style="padding:8px 12px;" onclick="openSidebar()">
+        <i class="bi bi-list fs-5" style="color:var(--text);"></i>
+      </button>
     </div>
-    <div class="sidebar-footer">
-      <i class="bi bi-activity me-1"></i> Track. Lift. Progress.
+  </div>
+
+  {% if messages %}
+  <div style="padding: 12px 18px 0;">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %} d-flex align-items-center gap-2 mb-2" role="alert">
+      <i class="bi bi-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+      {{ message }}
     </div>
-  </nav>
+    {% endfor %}
+  </div>
+  {% endif %}
 
-  <!-- Mobile toggle -->
-  <button class="btn btn-ghost d-md-none position-fixed" style="top:12px;left:12px;z-index:200" id="menuToggle">
-    <i class="bi bi-list fs-4"></i>
-  </button>
+  {% block content %}{% endblock %}
+</main>
 
-  <!-- Main -->
-  <main class="main-content">
-    {% if messages %}
-    <div class="position-fixed top-0 end-0 p-3 toast-container">
-      {% for message in messages %}
-      <div class="toast show align-items-center text-white border-0 mb-2"
-           style="background: {% if message.tags == 'success' %}var(--success){% elif message.tags == 'error' %}var(--danger){% else %}var(--accent){% endif %}; border-radius:8px;">
-        <div class="d-flex">
-          <div class="toast-body">{{ message }}</div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
-      </div>
-      {% endfor %}
+<!-- Bottom navigation (mobile) -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="{% url 'dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <i class="bi bi-grid-1x2"></i>
+      <span>Home</span>
+    </a>
+    <a href="{% url 'session_list' %}" class="bottom-nav-item {% if 'session_list' == request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-journal-text"></i>
+      <span>Log</span>
+    </a>
+    <a href="{% url 'session_new' %}" class="bottom-nav-item fab">
+      <div class="fab-circle"><i class="bi bi-plus-lg"></i></div>
+      <span style="font-size:0.58rem;margin-top:2px;">New</span>
+    </a>
+    <a href="{% url 'profile' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+      <i class="bi bi-person"></i>
+      <span>Profile</span>
+    </a>
+    <button class="bottom-nav-item" onclick="openSidebar()">
+      <i class="bi bi-list"></i>
+      <span>Menu</span>
+    </button>
+  </div>
+</nav>
+
+{% else %}
+<main>
+  {% if messages %}
+  <div style="position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:999;width:90%;max-width:420px;">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %} mb-2">
+      {{ message }}
     </div>
-    {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+{% endif %}
 
-    {% block content %}{% endblock %}
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    document.getElementById('menuToggle')?.addEventListener('click', () => {
-      document.querySelector('.sidebar').classList.toggle('open');
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function openSidebar() {
+    document.getElementById('sidebar')?.classList.add('open');
+    document.getElementById('sidebarOverlay')?.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('sidebarOverlay')?.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  // Auto-dismiss alerts after 4s
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(a => {
+      a.style.transition = 'opacity 0.5s';
+      a.style.opacity = '0';
+      setTimeout(() => a.remove(), 500);
     });
-    // Auto-dismiss toasts
-    document.querySelectorAll('.toast').forEach(t => setTimeout(() => t.remove(), 4000));
-  </script>
-  {% block extra_js %}{% endblock %}
+  }, 4000);
+</script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

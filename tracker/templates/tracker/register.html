@@ -1,0 +1,44 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Register — IronLog{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo"><span>Iron</span>Log</div>
+    <div class="auth-subtitle">Create your account</div>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" placeholder="Pick a username"
+               autocomplete="username" autofocus required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+        <input type="email" name="email" class="form-control" placeholder="you@email.com"
+               autocomplete="email">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password1" class="form-control" placeholder="Min. 8 characters"
+               autocomplete="new-password" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" name="password2" class="form-control" placeholder="Repeat password"
+               autocomplete="new-password" required>
+      </div>
+      <button type="submit" class="btn-accent w-100" style="justify-content:center;padding:12px;">
+        <i class="bi bi-person-check"></i> Create Account
+      </button>
+    </form>
+
+    <div class="divider-label" style="margin-top:24px;">Already have an account?</div>
+
+    <a href="{% url 'login' %}" class="btn-ghost w-100" style="justify-content:center;padding:11px;text-decoration:none;">
+      <i class="bi bi-box-arrow-in-right"></i> Sign In
+    </a>
+  </div>
+</div>
+{% endblock %}

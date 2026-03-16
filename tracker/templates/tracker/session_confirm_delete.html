@@ -7,24 +7,25 @@
 </div>
 <div class="page-body">
   <div class="row justify-content-center">
-    <div class="col-md-5">
-      <div class="card" style="border-color:var(--danger);">
+    <div class="col-12 col-sm-8 col-md-5">
+      <div class="card" style="border-color:rgba(255,56,96,0.3);">
         <div class="card-body p-4 text-center">
-          <i class="bi bi-exclamation-triangle" style="font-size:2.5rem;color:var(--danger);display:block;margin-bottom:16px;"></i>
+          <i class="bi bi-exclamation-triangle" style="font-size:2.4rem;color:var(--danger);display:block;margin-bottom:14px;"></i>
           <h5 style="font-weight:700;margin-bottom:8px;">Are you sure?</h5>
-          <p style="color:var(--muted);font-size:0.9rem;">
+          <p style="color:var(--muted);font-size:0.88rem;margin-bottom:20px;">
             This will permanently delete the session for
             <strong style="color:var(--text);">{{ session.day }}, {{ session.date|date:"d M Y" }}</strong>
-            and all its exercises and sets.
+            along with all exercises and sets.
           </p>
-          <div class="d-flex gap-2 justify-content-center mt-3">
+          <div class="d-flex gap-2 justify-content-center">
             <form method="post">
               {% csrf_token %}
-              <button type="submit" class="btn btn-accent" style="background:var(--danger);">
-                <i class="bi bi-trash me-1"></i> Yes, Delete
+              <button type="submit" class="btn-accent"
+                      style="background:var(--danger);padding:10px 22px;">
+                <i class="bi bi-trash me-1"></i> Delete
               </button>
             </form>
-            <a href="{% url 'session_detail' session.pk %}" class="btn btn-ghost">Cancel</a>
+            <a href="{% url 'session_detail' session.pk %}" class="btn-ghost">Cancel</a>
           </div>
         </div>
       </div>

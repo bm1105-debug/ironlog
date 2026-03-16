@@ -1,35 +1,25 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 
 DAYS_OF_WEEK = [
-    ('Monday', 'Monday'),
-    ('Tuesday', 'Tuesday'),
-    ('Wednesday', 'Wednesday'),
-    ('Thursday', 'Thursday'),
-    ('Friday', 'Friday'),
-    ('Saturday', 'Saturday'),
-    ('Sunday', 'Sunday'),
+    ('Monday', 'Monday'), ('Tuesday', 'Tuesday'), ('Wednesday', 'Wednesday'),
+    ('Thursday', 'Thursday'), ('Friday', 'Friday'),
+    ('Saturday', 'Saturday'), ('Sunday', 'Sunday'),
 ]
 
 MUSCLE_GROUPS = [
-    ('Chest', 'Chest'),
-    ('Back', 'Back'),
-    ('Shoulders', 'Shoulders'),
-    ('Biceps', 'Biceps'),
-    ('Triceps', 'Triceps'),
-    ('Legs', 'Legs'),
-    ('Glutes', 'Glutes'),
-    ('Core / Abs', 'Core / Abs'),
-    ('Full Body', 'Full Body'),
-    ('Cardio', 'Cardio'),
-    ('Other', 'Other'),
+    ('Chest', 'Chest'), ('Back', 'Back'), ('Shoulders', 'Shoulders'),
+    ('Biceps', 'Biceps'), ('Triceps', 'Triceps'), ('Legs', 'Legs'),
+    ('Glutes', 'Glutes'), ('Core / Abs', 'Core / Abs'),
+    ('Full Body', 'Full Body'), ('Cardio', 'Cardio'), ('Other', 'Other'),
 ]
 
 
 class WorkoutSession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')
     date = models.DateField()
     day = models.CharField(max_length=20, choices=DAYS_OF_WEEK)
-    muscle_groups = models.CharField(max_length=200)  # comma-separated
+    muscle_groups = models.CharField(max_length=200)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -37,7 +27,7 @@ class WorkoutSession(models.Model):
         ordering = ['-date', '-created_at']
 
     def __str__(self):
-        return f"{self.date} - {self.day} - {self.muscle_groups}"
+        return f"{self.user.username} — {self.date} {self.day}"
 
     def muscle_groups_list(self):
         return [m.strip() for m in self.muscle_groups.split(',') if m.strip()]

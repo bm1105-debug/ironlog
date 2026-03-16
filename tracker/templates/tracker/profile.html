@@ -1,0 +1,115 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Profile — IronLog{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">My <span>Profile</span></h1>
+</div>
+
+<div class="page-body">
+  <div class="row g-4">
+
+    <!-- Stats -->
+    <div class="col-12">
+      <div class="row g-3">
+        <div class="col-4">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-fire"></i></div>
+            <div class="stat-number">{{ total_sessions }}</div>
+            <div class="stat-label">Sessions</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-lightning-charge"></i></div>
+            <div class="stat-number">{{ total_exercises }}</div>
+            <div class="stat-label">Exercises</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-bar-chart-steps"></i></div>
+            <div class="stat-number">{{ total_sets }}</div>
+            <div class="stat-label">Total Sets</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update info -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-person me-2"></i>Account Info</div>
+        <div class="card-body p-4">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_info">
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-control" value="{{ user.username }}" disabled
+                     style="opacity:0.5;cursor:not-allowed;">
+              <div style="font-size:0.73rem;color:var(--muted);margin-top:5px;">Username cannot be changed.</div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control"
+                     value="{{ user.email }}" placeholder="you@email.com">
+            </div>
+            <button type="submit" class="btn-accent">
+              <i class="bi bi-check-lg"></i> Save Changes
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change password -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-shield-lock me-2"></i>Change Password</div>
+        <div class="card-body p-4">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change_password">
+            <div class="mb-3">
+              <label class="form-label">Current Password</label>
+              <input type="password" name="old_password" class="form-control"
+                     placeholder="Current password" autocomplete="current-password" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">New Password</label>
+              <input type="password" name="new_password1" class="form-control"
+                     placeholder="Min. 8 characters" autocomplete="new-password" required>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Confirm New Password</label>
+              <input type="password" name="new_password2" class="form-control"
+                     placeholder="Repeat new password" autocomplete="new-password" required>
+            </div>
+            <button type="submit" class="btn-accent">
+              <i class="bi bi-lock"></i> Update Password
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="col-12">
+      <div class="card" style="border-color:rgba(255,56,96,0.25);">
+        <div class="card-header" style="color:var(--danger);"><i class="bi bi-exclamation-triangle me-2"></i>Danger Zone</div>
+        <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <div style="font-weight:600;margin-bottom:4px;">Log out of your account</div>
+            <div style="font-size:0.82rem;color:var(--muted);">You can always sign back in.</div>
+          </div>
+          <a href="{% url 'logout' %}" class="btn-ghost" style="color:var(--danger) !important;border-color:var(--danger);">
+            <i class="bi bi-box-arrow-right"></i> Log Out
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
